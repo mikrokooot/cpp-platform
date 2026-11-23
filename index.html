@@ -990,7 +990,7 @@
                             read: () => inputData
                         }
                     };
-                    const result = JSCPP.run(code, inputData, config);
+                    const result = JSCPP.run(prepareCpp(code), inputData, config);
                     if(result && result !== 0) consoleOutputEl.textContent += `\n[Код ${result}]`;
                     resolve(true);
                 } catch (error) {
@@ -1224,11 +1224,47 @@
             return m ? m[0] : t.theory;
         }
 
+        // JSCPP не понимает "std::": убираем префикс (вне строк и комментариев)
+        // и добавляем using namespace std; на ту же строку, что и последний #include
+        // (чтобы номера строк в ошибках не сдвигались)
+        function prepareCpp(code) {
+            code = String(code || '');
+            let out = '', i = 0;
+            const n = code.length;
+            while (i < n) {
+                const c = code[i], d = code[i + 1];
+                if (c === '"' || c === "'") {
+                    let j = i + 1;
+                    while (j < n && code[j] !== c) { if (code[j] === '\\') j++; j++; }
+                    out += code.slice(i, j + 1); i = j + 1;
+                } else if (c === '/' && d === '/') {
+                    let j = code.indexOf('\n', i); if (j < 0) j = n;
+                    out += code.slice(i, j); i = j;
+                } else if (c === '/' && d === '*') {
+                    let j = code.indexOf('*/', i + 2); j = j < 0 ? n : j + 2;
+                    out += code.slice(i, j); i = j;
+                } else if (code.startsWith('std::', i) && !/\w/.test(code[i - 1] || '')) {
+                    i += 5;
+                } else { out += c; i++; }
+            }
+            if (!/using\s+namespace\s+std\s*;/.test(out)) {
+                const incl = [...out.matchAll(/^[ \t]*#include[^\n]*/gm)];
+                if (incl.length) {
+                    const last = incl[incl.length - 1];
+                    const end = last.index + last[0].length;
+                    out = out.slice(0, end) + ' using namespace std;' + out.slice(end);
+                } else {
+                    out = 'using namespace std; ' + out;
+                }
+            }
+            return out;
+        }
+
         // Запуск без вывода в основную консоль (для экзамена)
         function execCpp(code, input) {
             let out = '';
             try {
-                JSCPP.run(code, input || '', { stdio: { write: s => { out += s; } }, maxTimeout: 5000 });
+                JSCPP.run(prepareCpp(code), input || '', { stdio: { write: s => { out += s; } }, maxTimeout: 5000 });
                 return { ok: true, out: out };
             } catch (e) {
                 return { ok: false, out: out, error: (e && e.message) || String(e) };
