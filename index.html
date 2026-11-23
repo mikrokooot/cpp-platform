@@ -221,6 +221,29 @@
         .exam-tab.done { color: var(--accent-green); }
 
         @media (max-width: 900px) { .form-row2 { grid-template-columns: 1fr; } }
+
+        /* --- Песочница и карточка студента --- */
+        .sb-title { flex: 1; min-width: 0; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); padding: 0.4rem 0.7rem; font-size: 0.9rem; margin-right: 0.7rem; font-family: inherit; }
+        .sb-title:focus { outline: none; border-color: var(--accent-blue); }
+        .sb-input { flex: none; height: 96px; border-top: 1px solid var(--border-color); background: #1e1e1e; color: #d4d4d4; padding: 0.7rem 1rem; font-family: Consolas, monospace; font-size: 13px; resize: vertical; }
+        .sb-status { font-size: 0.78rem; color: var(--text-muted); }
+        .sb-status.err { color: var(--accent-red); }
+        .sb-tab { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sb-side-btn { width: 100%; justify-content: center; margin-bottom: 1rem; background: var(--accent-purple); }
+
+        .sd-summary { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+        .sd-pill { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.5rem 0.9rem; font-size: 0.85rem; }
+        .sd-pill b { color: var(--accent-blue); font-size: 1.05rem; margin-right: 0.3rem; }
+        .sd-day td { background: rgba(139,92,246,0.12); color: var(--accent-purple); font-weight: bold; font-size: 0.82rem; }
+        .sd-time { color: var(--text-muted); white-space: nowrap; width: 1%; font-variant-numeric: tabular-nums; }
+        .sd-details { border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 0.6rem; background: rgba(0,0,0,0.15); }
+        .sd-details summary { padding: 0.7rem 1rem; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-weight: 600; }
+        .sd-details summary .sd-meta { color: var(--text-muted); font-weight: normal; font-size: 0.82rem; }
+        .sd-details .sd-body { padding: 0 1rem 1rem; }
+        .sd-label { font-size: 0.75rem; color: var(--text-muted); margin: 0.6rem 0 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .sd-code { background: #1e1e1e; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem; font-family: Consolas, monospace; font-size: 13px; white-space: pre-wrap; overflow-x: auto; max-height: 340px; overflow-y: auto; color: #d4d4d4; }
+        .sd-out { background: #000; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--accent-green); max-height: 200px; overflow-y: auto; }
+        #groupResult tbody tr:hover { background: rgba(255,255,255,0.04); }
     </style>
 </head>
 <body>
@@ -263,6 +286,7 @@
     <div class="main-content hidden" id="studentView">
         <aside class="sidebar">
             <div id="examBanner"></div>
+            <button class="btn sb-side-btn" id="sbOpen">🧪 Песочница</button>
             <h2>Курс: Основы C++ (25)</h2>
             <ul class="task-list" id="taskList"></ul>
         </aside>
@@ -292,6 +316,40 @@
                     </div>
                     <div class="output" id="consoleOutput">Нажмите "Запустить"...</div>
                     <div class="status-message" id="checkStatus"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ПЕСОЧНИЦА (СТУДЕНТ) -->
+        <main class="workspace hidden" id="sandboxView">
+            <section class="lecture-panel">
+                <div class="lecture-header" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <div>
+                        <h2>🧪 Песочница</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Пишите любой C++ код, запускайте и экспериментируйте. Всё сохраняется автоматически, преподаватель может это посмотреть.</p>
+                    </div>
+                    <button class="btn btn-ghost" id="sbBack">← К заданиям</button>
+                </div>
+                <div class="exam-tabs" id="sbList" style="padding-bottom: 1rem;"></div>
+            </section>
+            <section class="practice-panel">
+                <div class="editor-container">
+                    <div class="panel-header">
+                        <input type="text" id="sbTitle" class="sb-title" maxlength="100" placeholder="Название черновика">
+                        <div style="display:flex; gap:0.5rem;">
+                            <button class="btn" id="sbRun">▶ Запустить</button>
+                            <button class="btn btn-danger" id="sbDelete" title="Удалить черновик">🗑</button>
+                        </div>
+                    </div>
+                    <textarea id="sbEditor" spellcheck="false" maxlength="50000"></textarea>
+                </div>
+                <div class="output-container">
+                    <div class="panel-header">
+                        <h3>🖥️ Консоль</h3>
+                        <span id="sbStatus" class="sb-status"></span>
+                    </div>
+                    <div class="output" id="sbOutput">Нажмите «Запустить»...</div>
+                    <textarea id="sbInput" class="sb-input" spellcheck="false" maxlength="5000" placeholder="Ввод для программы (stdin), например: 5"></textarea>
                 </div>
             </section>
         </main>
@@ -386,6 +444,19 @@
                             <tbody id="studentsTableBody"></tbody>
                         </table>
                     </div>
+                <p class="form-hint hidden" id="groupHint">👆 Нажмите на студента в таблице, чтобы увидеть его действия, код по заданиям и песочницу.</p>
+                <section class="group-card hidden" id="studentDetail">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom: 0.5rem;">
+                        <h3 id="sdTitle" style="color: var(--accent-purple);">Студент</h3>
+                        <button class="btn btn-sm btn-ghost" onclick="closeStudentDetail()">✕ Закрыть</button>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom: 1rem;">
+                        <button class="tab-btn active" data-sd="activity" onclick="setSdTab('activity')">🕘 Активность</button>
+                        <button class="tab-btn" data-sd="tasks" onclick="setSdTab('tasks')">✅ Задания и код</button>
+                        <button class="tab-btn" data-sd="sandbox" onclick="setSdTab('sandbox')">🧪 Песочница</button>
+                    </div>
+                    <div id="sdBody"></div>
+                </section>
                 </div>
             </div>
 
@@ -725,6 +796,8 @@
 
         async function logoutUser() {
             await flushSave();
+            await flushSb();
+            await flushLog();
             if (db) await db.auth.signOut();
 
             currentUserId = null;
@@ -736,6 +809,9 @@
             examsAll = [];
             currentGroup = '';
             resetExamUi();
+            sbList = []; sbCurrent = null; sbDirty = false; logQueue = [];
+            el('sandboxView').classList.add('hidden');
+            closeStudentDetail();
 
             document.getElementById('authModal').classList.remove('hidden');
             document.getElementById('mainHeader').classList.add('hidden');
@@ -764,6 +840,7 @@
 
                 await loadProgress();
                 await loadLectures();
+                logEvent('login', null, null, 0);
                 document.getElementById('studentView').classList.remove('hidden');
                 document.getElementById('teacherView').classList.add('hidden');
                 initTaskList();
@@ -872,7 +949,7 @@
                 const sp = document.createElement('span');
                 sp.textContent = task.title;
                 li.appendChild(sp);
-                li.onclick = () => loadTask(task.id);
+                li.onclick = () => { closeSandbox(); loadTask(task.id); logEvent('task_open', String(task.id), null, 3000); };
                 taskListEl.appendChild(li);
             });
         }
@@ -928,6 +1005,7 @@
             btnRun.disabled = true;
             const task = tasks.find(t => t.id === currentTaskId);
             await runCode(task.input || "");
+            logEvent('run', String(currentTaskId), null, 20000);
             btnRun.innerHTML = '▶ Запустить';
             btnRun.disabled = false;
         };
@@ -965,9 +1043,11 @@
                 const taskEl = document.querySelector(`.task-item[data-id="${taskId}"]`);
                 if (taskEl) taskEl.classList.add('completed');
                 await persistProgress(taskId);
+                logEvent('check_ok', String(taskId), null, 0);
             } else {
                 showCheckError(expectedOutput, actualOutput);
                 checkStatusEl.className = 'status-message status-error';
+                logEvent('check_fail', String(taskId), null, 10000);
             }
 
             btnCheck.innerHTML = '✓ Проверить';
@@ -1000,6 +1080,7 @@
             input.value = group;
             localStorage.setItem('cpp_teacher_last_group', group);
             showMessage('Загрузка...');
+            closeStudentDetail();
 
             const { data, error } = await db.rpc('group_progress', { p_group: group });
             if (error) return showMessage('Не удалось загрузить данные: ' + error.message);
@@ -1048,6 +1129,9 @@
                 tdExtra.textContent = String(s.extra || 0);
 
                 row.append(tdName, tdDone, tdExtra, tdProgress);
+                row.style.cursor = 'pointer';
+                row.title = 'Открыть подробности по студенту';
+                row.onclick = () => openStudentDetail(s.user_id, s.username);
                 tbody.appendChild(row);
             });
 
@@ -1057,6 +1141,7 @@
 
             msgEl.classList.add('hidden');
             resultEl.classList.remove('hidden');
+            el('groupHint').classList.remove('hidden');
         }
 
         // =====================================================================
@@ -1222,6 +1307,7 @@
                 'Экзамен «' + e.title + '»\nЗаданий: ' + e.task_ids.length + ', время: ' + e.duration_min + ' мин.\n\n' +
                 'Таймер запустится сразу и остановить его нельзя. ИИ-помощник и список лекций во время экзамена недоступны.\n\nНачать?')) return;
 
+            closeSandbox();
             await flushSave();
             const { data, error } = await db.rpc('start_exam', { p_exam: e.id });
             if (error) { showToast(error.message, true); await loadExamBanner(); return; }
@@ -1231,6 +1317,7 @@
             e.task_ids.forEach(id => { const t = tasks.find(x => x.id === id); if (t) list.push(t); });
             if (!list.length) { showToast('Нет доступных заданий. Сообщите преподавателю.', true); return; }
 
+            logEvent(resuming ? 'exam_resume' : 'exam_start', String(e.id), e.title, 0);
             let draft = {};
             try { draft = JSON.parse(localStorage.getItem(examDraftKey(e.id)) || '{}') || {}; } catch (err) {}
 
@@ -1370,6 +1457,7 @@
             }
             try { localStorage.removeItem(examDraftKey(s.exam.id)); } catch (e) {}
             leaveExamView();
+            logEvent('exam_finish', String(s.exam.id), score + ' / ' + s.list.length, 0);
             await loadExamBanner();
             showToast('Экзамен сдан. Результат: ' + score + ' / ' + s.list.length);
         }
@@ -1392,6 +1480,443 @@
             examResults = {};
             const b = el('examBanner');
             if (b) b.innerHTML = '';
+        }
+
+
+        // =====================================================================
+        // ЖУРНАЛ ДЕЙСТВИЙ СТУДЕНТА
+        // =====================================================================
+        let logQueue = [];
+        let logTimer = null;
+        const logLast = {};
+
+        // kind: что произошло, ref: номер задания/экзамена, detail: короткая пометка,
+        // gap: не писать одно и то же событие чаще, чем раз в gap мс
+        function logEvent(kind, ref, detail, gap) {
+            if (!db || !currentUserId || currentUserRole !== 'student') return;
+            const g = (gap === undefined) ? 5000 : gap;
+            const key = kind + '|' + (ref || '');
+            const now = Date.now();
+            if (g && logLast[key] && now - logLast[key] < g) return;
+            logLast[key] = now;
+            logQueue.push({ user_id: currentUserId, kind: kind, ref: ref || null, detail: detail ? String(detail).slice(0, 300) : null });
+            if (!logTimer) logTimer = setTimeout(flushLog, 2500);
+        }
+
+        async function flushLog() {
+            clearTimeout(logTimer);
+            logTimer = null;
+            if (!logQueue.length || !db) return;
+            const batch = logQueue.splice(0, logQueue.length);
+            const { error } = await db.from('activity_log').insert(batch);
+            if (error) console.warn('activity:', error.message);
+        }
+
+        // =====================================================================
+        // ПЕСОЧНИЦА (СТУДЕНТ)
+        // =====================================================================
+        const SB_MAX = 30;
+        let sbList = [];
+        let sbCurrent = null;
+        let sbTimer = null;
+        let sbDirty = false;
+
+        const sbIsOpen = () => !el('sandboxView').classList.contains('hidden');
+        const fmtClock = d => new Date(d).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+        function setSbStatus(text, isErr) {
+            const s = el('sbStatus');
+            s.textContent = text || '';
+            s.className = 'sb-status' + (isErr ? ' err' : '');
+        }
+
+        function newId() {
+            if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+            });
+        }
+
+        async function openSandbox() {
+            await flushSave();
+            el('studentMain').classList.add('hidden');
+            el('sandboxView').classList.remove('hidden');
+            document.querySelectorAll('.task-item').forEach(x => x.classList.remove('active'));
+            logEvent('sandbox_open');
+            window.scrollTo({ top: 0 });
+            await loadSandbox();
+        }
+
+        function closeSandbox() {
+            if (!sbIsOpen()) return;
+            el('sandboxView').classList.add('hidden');
+            el('studentMain').classList.remove('hidden');
+            flushSb();
+        }
+
+        async function loadSandbox() {
+            setSbStatus('Загрузка...');
+            const { data, error } = await db.from('sandbox_snippets').select('*')
+                .eq('user_id', currentUserId).order('updated_at', { ascending: false });
+            if (error) { setSbStatus('Не удалось загрузить: ' + error.message, true); return; }
+            sbList = (data || []).map(s => ({ ...s, _saved: true }));
+            sbCurrent = null;
+            sbDirty = false;
+            if (sbList.length) sbSelect(sbList[0].id); else sbNew();
+        }
+
+        function renderSbList() {
+            const box = el('sbList');
+            box.innerHTML = '';
+            sbList.forEach(s => {
+                const b = document.createElement('button');
+                b.className = 'exam-tab sb-tab' + (sbCurrent && s.id === sbCurrent.id ? ' active' : '');
+                b.textContent = s.title || 'Без названия';
+                b.title = s.title;
+                b.onclick = () => sbSelect(s.id);
+                box.appendChild(b);
+            });
+            const add = document.createElement('button');
+            add.className = 'exam-tab';
+            add.textContent = '+ Новый';
+            add.onclick = () => sbNew();
+            box.appendChild(add);
+        }
+
+        function sbNew() {
+            if (sbList.length >= SB_MAX) { showToast('Максимум ' + SB_MAX + ' черновиков. Удалите ненужные.', true); return; }
+            flushSb();
+            const s = { id: newId(), title: 'Без названия', code: DEFAULT_STARTER, stdin: '', updated_at: new Date().toISOString(), _saved: false };
+            sbList.unshift(s);
+            sbDirty = false;                 // пустой черновик попадёт в базу после первой правки
+            sbSelect(s.id, true);
+            el('sbTitle').focus();
+            el('sbTitle').select();
+        }
+
+        function sbSelect(id, keepDirty) {
+            if (!keepDirty) flushSb();
+            // нетронутый новый черновик не сохраняем: убираем из списка
+            if (sbCurrent && sbCurrent.id !== id && !sbCurrent._saved && !sbCurrent._touched) {
+                const old = sbCurrent.id;
+                sbList = sbList.filter(x => x.id !== old);
+            }
+            sbCurrent = sbList.find(x => x.id === id) || null;
+            if (!sbCurrent) return;
+            el('sbTitle').value = sbCurrent.title;
+            el('sbEditor').value = sbCurrent.code;
+            el('sbInput').value = sbCurrent.stdin;
+            el('sbOutput').textContent = 'Нажмите «Запустить»...';
+            setSbStatus(sbCurrent._saved ? 'Сохранено' : 'Новый черновик');
+            renderSbList();
+        }
+
+        function sbEdited() {
+            if (!sbCurrent) return;
+            sbCurrent.title = (el('sbTitle').value || '').slice(0, 100) || 'Без названия';
+            sbCurrent.code = el('sbEditor').value;
+            sbCurrent.stdin = el('sbInput').value;
+            sbDirty = true;
+            sbCurrent._touched = true;
+            setSbStatus('Сохранение...');
+            clearTimeout(sbTimer);
+            sbTimer = setTimeout(flushSb, 1200);
+        }
+
+        async function flushSb() {
+            clearTimeout(sbTimer);
+            sbTimer = null;
+            if (!sbDirty || !sbCurrent || !db || !currentUserId) return true;
+            const s = sbCurrent;
+            sbDirty = false;
+            const row = { id: s.id, user_id: currentUserId, title: s.title, code: s.code, stdin: s.stdin, updated_at: new Date().toISOString() };
+            const { error } = await db.from('sandbox_snippets').upsert(row, { onConflict: 'id' });
+            if (error) {
+                if (sbCurrent && sbCurrent.id === s.id) { sbDirty = true; setSbStatus('Не удалось сохранить: ' + error.message, true); }
+                return false;
+            }
+            s._saved = true;
+            s.updated_at = row.updated_at;
+            if (sbCurrent && sbCurrent.id === s.id) setSbStatus('Сохранено в ' + fmtClock(row.updated_at));
+            renderSbList();
+            return true;
+        }
+
+        async function sbDelete() {
+            if (!sbCurrent) return;
+            if (!confirm('Удалить черновик «' + sbCurrent.title + '»?')) return;
+            const s = sbCurrent;
+            if (s._saved) {
+                const { error } = await db.from('sandbox_snippets').delete().eq('id', s.id);
+                if (error) { showToast('Не удалось удалить: ' + error.message, true); return; }
+            }
+            clearTimeout(sbTimer);
+            sbDirty = false;
+            sbList = sbList.filter(x => x.id !== s.id);
+            sbCurrent = null;
+            if (sbList.length) sbSelect(sbList[0].id, true); else sbNew();
+        }
+
+        function withEnter(s) {
+            s = String(s || '').replace(/\r/g, '');
+            return (s && !s.endsWith('\n')) ? s + '\n' : s;
+        }
+
+        el('sbOpen').onclick = openSandbox;
+        el('sbBack').onclick = closeSandbox;
+        el('sbDelete').onclick = sbDelete;
+        el('sbTitle').addEventListener('input', sbEdited);
+        el('sbEditor').addEventListener('input', sbEdited);
+        el('sbInput').addEventListener('input', sbEdited);
+        el('sbEditor').addEventListener('keydown', e => {
+            if (e.key !== 'Tab') return;
+            e.preventDefault();
+            const t = e.target, s = t.selectionStart;
+            t.value = t.value.slice(0, s) + '    ' + t.value.slice(t.selectionEnd);
+            t.selectionStart = t.selectionEnd = s + 4;
+            sbEdited();
+        });
+        el('sbRun').onclick = () => {
+            if (!sbCurrent) return;
+            const r = execCpp(el('sbEditor').value, withEnter(el('sbInput').value));
+            const out = r.ok ? (r.out || '(программа ничего не вывела)') : 'Ошибка компиляции:\n' + r.error;
+            el('sbOutput').textContent = out.length > 20000 ? out.slice(0, 20000) + '\n...(вывод обрезан)' : out;
+            logEvent('sandbox_run', sbCurrent.id.slice(0, 8), sbCurrent.title, 30000);
+        };
+
+        window.addEventListener('pagehide', () => { flushLog(); flushSb(); });
+
+        // =====================================================================
+        // ПРЕПОДАВАТЕЛЬ: карточка студента
+        // =====================================================================
+        let sdState = { id: null, name: '', tab: 'activity' };
+
+        function taskTitleById(id) {
+            id = +id;
+            if (id <= 1000) { const t = baseTasks.find(x => x.id === id); return t ? t.title : 'Задание ' + id; }
+            const l = lecturesAll.find(x => 1000 + x.id === id);
+            return l ? '📘 ' + l.title : 'Лекция №' + (id - 1000) + ' (удалена)';
+        }
+
+        function actText(e) {
+            switch (e.kind) {
+                case 'login': return '🔑 Открыл сайт';
+                case 'task_open': return '📖 Открыл: ' + taskTitleById(e.ref);
+                case 'run': return '▶ Запустил код: ' + taskTitleById(e.ref);
+                case 'check_ok': return '✅ Решил: ' + taskTitleById(e.ref);
+                case 'check_fail': return '❌ Проверка не пройдена: ' + taskTitleById(e.ref);
+                case 'sandbox_open': return '🧪 Открыл песочницу';
+                case 'sandbox_run': return '🧪 Запустил код в песочнице' + (e.detail ? ': «' + e.detail + '»' : '');
+                case 'exam_start': return '📝 Начал экзамен «' + (e.detail || '') + '»';
+                case 'exam_resume': return '📝 Вернулся к экзамену «' + (e.detail || '') + '»';
+                case 'exam_finish': return '🏁 Сдал экзамен, результат ' + (e.detail || '');
+                default: return e.kind;
+            }
+        }
+
+        const fmtDT = v => v ? new Date(v).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+        const fmtDay = v => new Date(v).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        async function openStudentDetail(id, name) {
+            sdState = { id: id, name: name, tab: 'activity' };
+            el('studentDetail').classList.remove('hidden');
+            el('sdTitle').textContent = '👤 ' + name;
+            if (!lecturesAll.length) {
+                const { data } = await db.from('lectures').select('*').order('id');
+                if (data) lecturesAll = data;
+            }
+            setSdTab('activity');
+            el('studentDetail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeStudentDetail() {
+            el('studentDetail').classList.add('hidden');
+            sdState.id = null;
+        }
+
+        async function setSdTab(tab) {
+            sdState.tab = tab;
+            document.querySelectorAll('.tab-btn[data-sd]').forEach(b => b.classList.toggle('active', b.dataset.sd === tab));
+            const body = el('sdBody');
+            body.textContent = 'Загрузка...';
+            const id = sdState.id;
+            let node;
+            try {
+                node = tab === 'activity' ? await sdActivity(id) : tab === 'tasks' ? await sdTasks(id) : await sdSandbox(id);
+            } catch (e) {
+                node = document.createTextNode('Не удалось загрузить: ' + (e.message || e));
+            }
+            if (sdState.id !== id || sdState.tab !== tab) return;   // успели переключиться
+            body.textContent = '';
+            body.appendChild(node);
+        }
+
+        function pill(num, text) {
+            const p = document.createElement('div');
+            p.className = 'sd-pill';
+            const b = document.createElement('b');
+            b.textContent = num;
+            p.append(b, text);
+            return p;
+        }
+
+        function emptyNote(text) {
+            const p = document.createElement('p');
+            p.className = 'empty-state';
+            p.textContent = text;
+            return p;
+        }
+
+        async function sdActivity(id) {
+            const { data, error } = await db.from('activity_log').select('*').eq('user_id', id)
+                .order('id', { ascending: false }).limit(300);
+            if (error) throw error;
+            const ev = data || [];
+            const wrap = document.createElement('div');
+            if (!ev.length) {
+                wrap.appendChild(emptyNote('Журнал пока пуст: студент ещё ничего не делал на сайте после включения журнала.'));
+                return wrap;
+            }
+            const cnt = k => ev.filter(e => e.kind === k).length;
+            const opened = new Set(ev.filter(e => e.kind === 'task_open').map(e => e.ref)).size;
+            const sum = document.createElement('div');
+            sum.className = 'sd-summary';
+            sum.append(
+                pill(fmtDT(ev[0].created_at), 'последняя активность'),
+                pill(cnt('login'), 'заходов на сайт'),
+                pill(opened, 'заданий открывал'),
+                pill(cnt('run'), 'запусков кода'),
+                pill(cnt('check_ok'), 'успешных проверок'),
+                pill(cnt('check_fail'), 'неудачных проверок'),
+                pill(cnt('sandbox_run'), 'запусков в песочнице')
+            );
+            wrap.appendChild(sum);
+
+            const table = document.createElement('table');
+            table.className = 'student-table';
+            const tbody = document.createElement('tbody');
+            let lastDay = '';
+            ev.forEach(e => {
+                const day = new Date(e.created_at).toDateString();
+                if (day !== lastDay) {
+                    lastDay = day;
+                    const tr = document.createElement('tr');
+                    tr.className = 'sd-day';
+                    const td = document.createElement('td');
+                    td.colSpan = 2;
+                    td.textContent = fmtDay(e.created_at);
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                }
+                const tr = document.createElement('tr');
+                const t = document.createElement('td');
+                t.className = 'sd-time';
+                t.textContent = fmtClock(e.created_at);
+                const a = document.createElement('td');
+                a.textContent = actText(e);
+                tr.append(t, a);
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            const sw = document.createElement('div');
+            sw.style.overflowX = 'auto';
+            sw.appendChild(table);
+            wrap.appendChild(sw);
+            if (ev.length >= 300) wrap.appendChild(emptyNote('Показаны последние 300 событий.'));
+            return wrap;
+        }
+
+        async function sdTasks(id) {
+            const { data, error } = await db.from('task_progress').select('task_id, code, completed, updated_at').eq('user_id', id);
+            if (error) throw error;
+            const rows = (data || []).slice().sort((a, b) => a.task_id - b.task_id);
+            const wrap = document.createElement('div');
+            const doneBase = rows.filter(r => r.completed && r.task_id <= 1000).length;
+            const doneExtra = rows.filter(r => r.completed && r.task_id > 1000).length;
+            const sum = document.createElement('div');
+            sum.className = 'sd-summary';
+            sum.append(pill(doneBase + ' / ' + baseTasks.length, 'заданий курса выполнено'), pill(doneExtra, 'лекций преподавателя выполнено'));
+            wrap.appendChild(sum);
+            if (!rows.length) { wrap.appendChild(emptyNote('Студент ещё не приступал к заданиям.')); return wrap; }
+
+            rows.forEach(r => {
+                const d = document.createElement('details');
+                d.className = 'sd-details';
+                const s = document.createElement('summary');
+                const l = document.createElement('span');
+                l.textContent = (r.completed ? '✅ ' : '✏️ ') + taskTitleById(r.task_id);
+                const m = document.createElement('span');
+                m.className = 'sd-meta';
+                m.textContent = (r.completed ? 'выполнено' : 'в работе') + ' · ' + fmtDT(r.updated_at);
+                s.append(l, m);
+                const body = document.createElement('div');
+                body.className = 'sd-body';
+                const pre = document.createElement('pre');
+                pre.className = 'sd-code';
+                pre.textContent = r.code || '(код не сохранён)';
+                body.appendChild(pre);
+                d.append(s, body);
+                wrap.appendChild(d);
+            });
+            return wrap;
+        }
+
+        async function sdSandbox(id) {
+            const { data, error } = await db.from('sandbox_snippets').select('*').eq('user_id', id)
+                .order('updated_at', { ascending: false });
+            if (error) throw error;
+            const wrap = document.createElement('div');
+            const list = data || [];
+            if (!list.length) { wrap.appendChild(emptyNote('Студент ещё не пользовался песочницей.')); return wrap; }
+
+            list.forEach(sn => {
+                const d = document.createElement('details');
+                d.className = 'sd-details';
+                const s = document.createElement('summary');
+                const l = document.createElement('span');
+                l.textContent = '🧪 ' + sn.title;
+                const m = document.createElement('span');
+                m.className = 'sd-meta';
+                m.textContent = 'изменён ' + fmtDT(sn.updated_at);
+                s.append(l, m);
+                const body = document.createElement('div');
+                body.className = 'sd-body';
+
+                const lab = document.createElement('div');
+                lab.className = 'sd-label';
+                lab.textContent = 'Код';
+                const pre = document.createElement('pre');
+                pre.className = 'sd-code';
+                pre.textContent = sn.code;
+                body.append(lab, pre);
+
+                if (sn.stdin) {
+                    const l2 = document.createElement('div');
+                    l2.className = 'sd-label';
+                    l2.textContent = 'Ввод (stdin)';
+                    const p2 = document.createElement('pre');
+                    p2.className = 'sd-code';
+                    p2.textContent = sn.stdin;
+                    body.append(l2, p2);
+                }
+
+                const run = document.createElement('button');
+                run.className = 'btn btn-sm';
+                run.style.marginTop = '0.8rem';
+                run.textContent = '▶ Запустить у себя';
+                const out = document.createElement('pre');
+                out.className = 'sd-out hidden';
+                run.onclick = () => {
+                    const r = execCpp(sn.code, withEnter(sn.stdin));
+                    out.textContent = r.ok ? (r.out || '(программа ничего не вывела)') : 'Ошибка компиляции:\n' + r.error;
+                    out.classList.remove('hidden');
+                };
+                body.append(run, out);
+                d.append(s, body);
+                wrap.appendChild(d);
+            });
+            return wrap;
         }
 
         // ---------------------------------------------------------------
