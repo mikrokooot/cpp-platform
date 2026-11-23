@@ -169,6 +169,58 @@
             .practice-panel { flex-direction: column; }
             header { flex-direction: column; gap: 1rem; }
         }
+
+        /* --- Лекции преподавателя и экзамены --- */
+        .tab-bar { display: flex; gap: 0.5rem; padding: 1rem 1.5rem; flex-wrap: wrap; }
+        .tab-btn { padding: 0.6rem 1.1rem; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 10px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); }
+        .tab-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+
+        .form-grid { padding: 1.5rem; display: grid; gap: 1rem; }
+        .form-grid label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .form-grid input, .form-grid textarea, .form-grid select { width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 0.95rem; font-family: inherit; }
+        .form-grid textarea { min-height: 90px; resize: vertical; line-height: 1.5; background: #1e1e1e; }
+        .form-grid textarea.mono { font-family: Consolas, monospace; font-size: 14px; }
+        .form-grid input:focus, .form-grid textarea:focus { outline: none; border-color: var(--accent-blue); }
+        .form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-hint { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+        .form-hint code { background: rgba(0,0,0,0.4); padding: 0.1rem 0.35rem; border-radius: 4px; color: #fca5a5; }
+        .form-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; }
+        .form-msg { font-size: 0.9rem; font-weight: bold; }
+        .form-msg.ok { color: var(--accent-green); }
+        .form-msg.err { color: var(--accent-red); }
+
+        .list-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+        .list-row:last-child { border-bottom: none; }
+        .row-meta { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.25rem; }
+        .row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+        .btn-danger { background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); }
+        .btn-danger:hover { background: rgba(239,68,68,0.1); }
+        .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .chip { display: inline-block; font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; font-weight: bold; vertical-align: middle; }
+        .chip-open { background: rgba(16,185,129,0.2); color: var(--accent-green); }
+        .chip-closed { background: rgba(148,163,184,0.2); color: var(--text-muted); }
+        .chip-late { background: rgba(245,158,11,0.2); color: var(--accent-orange); }
+        .section-title { padding: 1.2rem 1.5rem 0; font-size: 1.05rem; color: var(--accent-purple); }
+        .section-body { padding: 0.5rem 1.5rem 1.2rem; }
+
+        .check-list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem; background: rgba(0,0,0,0.2); }
+        .form-grid .check-list label { flex-direction: row; align-items: center; gap: 0.6rem; font-weight: normal; color: var(--text-main); padding: 0.25rem 0; cursor: pointer; }
+        .form-grid .check-list input { width: auto; }
+        .pick-title { color: var(--accent-orange); font-size: 0.78rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0.6rem 0 0.3rem; }
+        .pick-title:first-child { margin-top: 0; }
+
+        .exam-card { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4); border-radius: 12px; padding: 0.9rem; margin-bottom: 1rem; font-size: 0.9rem; }
+        .exam-card .meta { color: var(--text-muted); margin: 0.3rem 0 0.6rem; }
+        .exam-timer { font-size: 1.9rem; font-weight: bold; color: var(--accent-orange); font-variant-numeric: tabular-nums; }
+        .exam-timer.danger { color: var(--accent-red); }
+        .exam-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 1rem 1.5rem 0; }
+        .exam-tab { min-width: 42px; padding: 0.45rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); cursor: pointer; font-weight: bold; }
+        .exam-tab.active { border-color: var(--accent-blue); background: rgba(59,130,246,0.2); }
+        .exam-tab.done { color: var(--accent-green); }
+
+        @media (max-width: 900px) { .form-row2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -210,10 +262,11 @@
     <!-- ИНТЕРФЕЙС СТУДЕНТА -->
     <div class="main-content hidden" id="studentView">
         <aside class="sidebar">
+            <div id="examBanner"></div>
             <h2>Курс: Основы C++ (25)</h2>
             <ul class="task-list" id="taskList"></ul>
         </aside>
-        <main class="workspace">
+        <main class="workspace" id="studentMain">
             <section class="lecture-panel">
                 <div class="lecture-header">
                     <h2 id="lectureTitle">Лекция</h2>
@@ -242,6 +295,41 @@
                 </div>
             </section>
         </main>
+
+        <!-- ЭКЗАМЕН (СТУДЕНТ) -->
+        <main class="workspace hidden" id="examView">
+            <section class="lecture-panel">
+                <div class="lecture-header" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <div>
+                        <h2 id="exTitle">Экзамен</h2>
+                        <p id="exSub" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;"></p>
+                    </div>
+                    <div style="text-align:right;">
+                        <div id="exTimer" class="exam-timer">00:00</div>
+                        <button class="btn btn-check" id="exFinish" style="margin-top:0.4rem;">Завершить экзамен</button>
+                    </div>
+                </div>
+                <div class="exam-tabs" id="exTabs"></div>
+                <div class="lecture-body" id="exTask"></div>
+            </section>
+            <section class="practice-panel">
+                <div class="editor-container">
+                    <div class="panel-header">
+                        <h3>💻 Решение</h3>
+                        <button class="btn" id="exRun">▶ Запустить</button>
+                    </div>
+                    <textarea id="exEditor" spellcheck="false"></textarea>
+                </div>
+                <div class="output-container">
+                    <div class="panel-header">
+                        <h3>🖥️ Консоль</h3>
+                        <button class="btn btn-check" id="exCheck">✓ Проверить</button>
+                    </div>
+                    <div class="output" id="exOutput">Нажмите «Запустить»...</div>
+                    <div class="status-message" id="exStatus"></div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <!-- ИНТЕРФЕЙС ПРЕПОДАВАТЕЛЯ -->
@@ -250,43 +338,118 @@
             <section class="lecture-panel">
                 <div class="lecture-header">
                     <h2>Панель преподавателя</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Введите группу, чтобы увидеть, кто из студентов сколько заданий выполнил</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Следите за прогрессом групп, добавляйте свои лекции с заданиями и проводите экзамены</p>
                 </div>
-                <div class="teacher-toolbar">
-                    <input type="text" id="groupSearch" list="groupList" placeholder="Группа, например ИС-21" autocomplete="off" onkeydown="if (event.key === 'Enter') showGroup()">
-                    <button class="btn" onclick="showGroup()">Показать</button>
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="groups" onclick="showTab('groups')">👥 Группы</button>
+                    <button class="tab-btn" data-tab="lectures" onclick="showTab('lectures')">📘 Лекции</button>
+                    <button class="tab-btn" data-tab="exams" onclick="showTab('exams')">📝 Экзамены</button>
                 </div>
             </section>
 
-            <p class="empty-state" id="groupMessage">Введите номер группы, чтобы увидеть студентов.</p>
+            <!-- Вкладка: группы -->
+            <div id="tv_groups" class="teacher-dashboard">
+                <section class="lecture-panel">
+                    <div class="teacher-toolbar">
+                        <input type="text" id="groupSearch" list="groupList" placeholder="Группа, например ИС-21" autocomplete="off" onkeydown="if (event.key === 'Enter') showGroup()">
+                        <button class="btn" onclick="showGroup()">Показать</button>
+                    </div>
+                </section>
 
-            <div id="groupResult" class="teacher-dashboard hidden">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Студентов в группе</h3>
-                        <div class="value" id="groupStudents">0</div>
+                <p class="empty-state" id="groupMessage">Введите номер группы, чтобы увидеть студентов.</p>
+
+                <div id="groupResult" class="teacher-dashboard hidden">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Студентов в группе</h3>
+                            <div class="value" id="groupStudents">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Средний прогресс</h3>
+                            <div class="value" id="groupAverage">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Заходили сегодня</h3>
+                            <div class="value" id="groupActive">0</div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <h3>Средний прогресс</h3>
-                        <div class="value" id="groupAverage">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Заходили сегодня</h3>
-                        <div class="value" id="groupActive">0</div>
+                    <div class="group-card">
+                        <table class="student-table" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Студент</th>
+                                    <th>Выполнено</th>
+                                    <th>Лекции препод.</th>
+                                    <th>Прогресс</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="group-card">
-                    <table class="student-table" id="studentsTable">
-                        <thead>
-                            <tr>
-                                <th>Студент</th>
-                                <th>Выполнено</th>
-                                <th>Прогресс</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody"></tbody>
-                    </table>
-                </div>
+            </div>
+
+            <!-- Вкладка: лекции -->
+            <div id="tv_lectures" class="teacher-dashboard hidden">
+                <section class="lecture-panel">
+                    <div class="lecture-header">
+                        <h2 id="lecFormTitle">Новая лекция</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Студенты увидят её в списке заданий в разделе «Лекции преподавателя»: текст, условие задачи, редактор кода и автопроверка.</p>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-row2">
+                            <label>Название *<input type="text" id="lecTitle" maxlength="120" placeholder="Например: Указатели"></label>
+                            <label>Короткое описание<input type="text" id="lecSubtitle" maxlength="120" placeholder="Например: Адреса и разыменование"></label>
+                        </div>
+                        <label>Для группы (пусто = для всех групп)<input type="text" id="lecGroup" list="groupList" placeholder="Например: ИС-21" autocomplete="off"></label>
+                        <label>Текст лекции *<textarea id="lecTheory" rows="9" placeholder="Объяснение темы..."></textarea></label>
+                        <p class="form-hint">Форматирование: пустая строка — новый абзац · <code>### Заголовок</code> · <code>**жирный**</code> · <code>`код`</code> в тексте · блок кода между <code>```</code> и <code>```</code>.</p>
+                        <label>Условие задачи *<textarea id="lecTask" rows="3" placeholder="Что студент должен написать. Например: Выведите квадрат введённого числа."></textarea></label>
+                        <div class="form-row2">
+                            <label>Входные данные (если программа читает ввод)<textarea id="lecInput" rows="3" class="mono" placeholder="5"></textarea></label>
+                            <label>Ожидаемый вывод *<textarea id="lecExpected" rows="3" class="mono" placeholder="25"></textarea></label>
+                        </div>
+                        <p class="form-hint">Задача засчитывается, если вывод программы студента совпадает с ожидаемым (пробелы и переводы строк по краям не учитываются).</p>
+                        <label>Заготовка кода (необязательно)<textarea id="lecStarter" rows="7" class="mono" placeholder="#include <iostream>&#10;using namespace std;&#10;&#10;int main() {&#10;    &#10;    return 0;&#10;}"></textarea></label>
+                        <div class="form-actions">
+                            <button class="btn btn-check" id="lecSave" onclick="saveLecture()">Сохранить лекцию</button>
+                            <button class="btn btn-ghost hidden" id="lecCancel" onclick="resetLectureForm()">Отмена</button>
+                            <span id="lecMsg" class="form-msg"></span>
+                        </div>
+                    </div>
+                </section>
+                <section class="group-card">
+                    <h3 style="color: var(--accent-purple); margin-bottom: 0.5rem;">Добавленные лекции</h3>
+                    <div id="lecList"></div>
+                </section>
+            </div>
+
+            <!-- Вкладка: экзамены -->
+            <div id="tv_exams" class="teacher-dashboard hidden">
+                <section class="lecture-panel">
+                    <div class="lecture-header">
+                        <h2>Новый экзамен</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Выберите задания, группу и время. Экзамен создаётся закрытым — студенты увидят его после нажатия «Открыть».</p>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-row2">
+                            <label>Название *<input type="text" id="examTitle" maxlength="120" placeholder="Например: Экзамен по основам C++"></label>
+                            <label>Группа *<input type="text" id="examGroup" list="groupList" placeholder="Например: ИС-21" autocomplete="off"></label>
+                        </div>
+                        <label>Время на экзамен, минут<input type="number" id="examMinutes" min="5" max="300" value="40"></label>
+                        <label>Задания экзамена *</label>
+                        <div class="check-list" id="examTaskList"></div>
+                        <div class="form-actions">
+                            <button class="btn btn-check" id="examCreate" onclick="createExam()">Создать экзамен</button>
+                            <span id="examMsg" class="form-msg"></span>
+                        </div>
+                    </div>
+                </section>
+                <section class="group-card">
+                    <h3 style="color: var(--accent-purple); margin-bottom: 0.5rem;">Экзамены</h3>
+                    <div id="examList"></div>
+                </section>
+                <section class="group-card hidden" id="examReport"></section>
             </div>
         </main>
     </div>
@@ -310,7 +473,7 @@
     <script>
         // --- БАЗА ДАННЫХ ЗАДАНИЙ (25 штук) ---
         const youtubeBtnHTML = `<div class="youtube-promo"><p>🎥 Нужен видеоразбор?</p><a href="https://youtube.com/@itproger?si=8m8Kuk49venWcaFb" target="_blank" class="btn-youtube">Смотреть на itproger</a></div>`;
-        const tasks = [
+        const baseTasks = [
             { id: 1, title: "1. Привет, мир!", subtitle: "Первая программа", theory: `<h3>Структура</h3><p>Программа начинается с <code>main()</code>.</p><pre><code class="language-cpp">#include &lt;iostream&gt;\nint main() { cout &lt;&lt; "Hi"; }</code></pre><p><b>Задача:</b> Выведите <code>Hello, World!</code></p>${youtubeBtnHTML}`, expectedOutput: "Hello, World!", starterCode: "#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}" },
             { id: 2, title: "2. Переменные", subtitle: "Ввод данных", theory: `<h3>Ввод</h3><p>Используйте <code>cin >></code>.</p><p><b>Задача:</b> Выведите число, умноженное на 2. (Ввод: 5)</p>${youtubeBtnHTML}`, expectedOutput: "10", input: "5\n", starterCode: "#include <iostream>\nusing namespace std;\nint main() {\n    int a;\n    cin >> a;\n    // Код\n    return 0;\n}" },
             { id: 3, title: "3. Условия (if)", subtitle: "Принятие решений", theory: `<h3>If / Else</h3><p><b>Задача:</b> Если число > 0, выведите 'Positive', иначе 'Negative'. (Ввод: 42)</p>${youtubeBtnHTML}`, expectedOutput: "Positive", input: "42\n", starterCode: "#include <iostream>\nusing namespace std;\nint main() {\n    int n;\n    cin >> n;\n    \n    return 0;\n}" },
@@ -337,6 +500,7 @@
             { id: 24, title: "24. Сортировка", subtitle: "Пузырек", theory: `<h3>Сортировка</h3><p><b>Задача:</b> Отсортировать 3 числа. (5 1 3)</p>${youtubeBtnHTML}`, expectedOutput: "1 3 5", input: "5 1 3\n", starterCode: "#include <iostream>\nusing namespace std;\nint main() {\n    int arr[3];\n    cin>>arr[0]>>arr[1]>>arr[2];\n    \n    return 0;\n}" },
             { id: 25, title: "25. Степень", subtitle: "Финальный проект", theory: `<h3>Степень</h3><p><b>Задача:</b> Возведите a в степень b. (2 3)</p>${youtubeBtnHTML}`, expectedOutput: "8", input: "2 3\n", starterCode: "#include <iostream>\nusing namespace std;\nint main() {\n    int a, b;\n    cin >> a >> b;\n    \n    return 0;\n}" }
         ];
+        let tasks = baseTasks.slice();   // + лекции преподавателя после входа
 
         // --- ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ (Supabase) ---
         // Эти два значения берутся в Supabase: Project Settings -> API.
@@ -352,6 +516,7 @@
             : null;
 
         let currentUserId = null;
+        let currentGroup = '';
         let currentUser = null;          // логин для отображения
         let currentUserRole = 'student'; // 'student' или 'teacher'
         let currentTaskId = 1;
@@ -554,6 +719,7 @@
             currentUserId = userId;
             currentUser = profile.username;
             currentUserRole = profile.role;
+            currentGroup = profile.group_name || '';
             await showPlatform(profile);
         }
 
@@ -565,6 +731,11 @@
             currentUser = null;
             currentUserRole = 'student';
             progress = {};
+            tasks = baseTasks.slice();
+            lecturesAll = [];
+            examsAll = [];
+            currentGroup = '';
+            resetExamUi();
 
             document.getElementById('authModal').classList.remove('hidden');
             document.getElementById('mainHeader').classList.add('hidden');
@@ -592,10 +763,12 @@
                     .then(({ error }) => { if (error) console.error(error); });
 
                 await loadProgress();
+                await loadLectures();
                 document.getElementById('studentView').classList.remove('hidden');
                 document.getElementById('teacherView').classList.add('hidden');
                 initTaskList();
                 loadTask(1);
+                loadExamBanner();
             } else {
                 document.getElementById('studentView').classList.add('hidden');
                 document.getElementById('teacherView').classList.remove('hidden');
@@ -683,12 +856,22 @@
 
         function initTaskList() {
             taskListEl.innerHTML = '';
+            let dividerAdded = false;
             tasks.forEach(task => {
+                if (task.custom && !dividerAdded) {
+                    dividerAdded = true;
+                    const d = document.createElement('li');
+                    d.textContent = 'Лекции преподавателя';
+                    d.style.cssText = 'list-style:none; margin:1rem 0 0.5rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent-orange); font-weight:bold;';
+                    taskListEl.appendChild(d);
+                }
                 const li = document.createElement('li');
                 li.className = 'task-item';
                 if (progress[task.id] && progress[task.id].completed) li.classList.add('completed');
                 li.dataset.id = task.id;
-                li.innerHTML = `<span>${task.title}</span>`;
+                const sp = document.createElement('span');
+                sp.textContent = task.title;
+                li.appendChild(sp);
                 li.onclick = () => loadTask(task.id);
                 taskListEl.appendChild(li);
             });
@@ -796,6 +979,7 @@
             fillGroupList();
             const last = localStorage.getItem('cpp_teacher_last_group') || '';
             document.getElementById('groupSearch').value = last;
+            showTab('groups');
             showGroup();
         }
 
@@ -832,7 +1016,7 @@
 
             students.forEach(s => {
                 const done = s.done;
-                const percent = Math.round((done / tasks.length) * 100);
+                const percent = Math.round((done / baseTasks.length) * 100);
                 percentSum += percent;
                 if (s.last_active === today) activeToday++;
 
@@ -843,7 +1027,7 @@
                 tdName.textContent = s.username;
 
                 const tdDone = document.createElement('td');
-                tdDone.textContent = `${done} / ${tasks.length}`;
+                tdDone.textContent = `${done} / ${baseTasks.length}`;
 
                 const tdProgress = document.createElement('td');
                 const wrap = document.createElement('div');
@@ -860,7 +1044,10 @@
                 wrap.append(bar, label);
                 tdProgress.appendChild(wrap);
 
-                row.append(tdName, tdDone, tdProgress);
+                const tdExtra = document.createElement('td');
+                tdExtra.textContent = String(s.extra || 0);
+
+                row.append(tdName, tdDone, tdExtra, tdProgress);
                 tbody.appendChild(row);
             });
 
@@ -870,6 +1057,698 @@
 
             msgEl.classList.add('hidden');
             resultEl.classList.remove('hidden');
+        }
+
+        // =====================================================================
+        // ЛЕКЦИИ ПРЕПОДАВАТЕЛЯ И ЭКЗАМЕНЫ
+        // =====================================================================
+        const el = id => document.getElementById(id);
+        const escHtml = s => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+        let lecturesAll = [];
+        let examsAll = [];
+        let editingLectureId = null;
+        let examsOpen = [];
+        let examResults = {};
+        let examSession = null;
+        let examTick = null;
+
+        const DEFAULT_STARTER = '#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}';
+
+        // Безопасное форматирование текста преподавателя (HTML не пропускается)
+        function renderRich(src) {
+            const parts = String(src || '').replace(/\r/g, '').split('```');
+            let html = '';
+            parts.forEach((p, i) => {
+                if (i % 2 === 1) {
+                    const code = p.replace(/^[a-zA-Z+]*\n/, '').replace(/\n$/, '');
+                    html += '<pre><code class="language-cpp">' + escHtml(code) + '</code></pre>';
+                } else {
+                    p.split(/\n{2,}/).forEach(block => {
+                        block = block.trim();
+                        if (!block) return;
+                        if (/^###\s/.test(block)) {
+                            html += '<h3>' + escHtml(block.replace(/^###\s+/, '')) + '</h3>';
+                            return;
+                        }
+                        const t = escHtml(block)
+                            .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+                            .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>')
+                            .replace(/\n/g, '<br>');
+                        html += '<p>' + t + '</p>';
+                    });
+                }
+            });
+            return html;
+        }
+
+        // Лекция из базы -> задание того же вида, что и встроенные
+        function lectureToTask(l) {
+            let input = String(l.input_data || '').replace(/\r\n/g, '\n');
+            if (input && !input.endsWith('\n')) input += '\n';
+            const inputHint = input.trim()
+                ? '<p style="color: var(--text-muted);">Ввод: <code>' + escHtml(input.trim().replace(/\n/g, ' ⏎ ')) + '</code></p>'
+                : '';
+            const taskHtml = renderRich(l.task_text) + inputHint;
+            return {
+                id: 1000 + l.id,
+                custom: true,
+                title: '📘 ' + l.title,
+                subtitle: l.subtitle || 'Лекция преподавателя',
+                theory: renderRich(l.theory) + '<div class="info-box"><b>Задача:</b>' + taskHtml + '</div>',
+                taskHtml: taskHtml,
+                expectedOutput: l.expected_output,
+                input: input,
+                starterCode: l.starter_code && l.starter_code.trim() ? l.starter_code : DEFAULT_STARTER
+            };
+        }
+
+        async function loadLectures() {
+            tasks = baseTasks.slice();
+            lecturesAll = [];
+            const { data, error } = await db.from('lectures').select('*').order('id');
+            if (error) { console.warn('lectures:', error.message); return; }
+            lecturesAll = data || [];
+            if (currentUserRole === 'student') lecturesAll.forEach(l => tasks.push(lectureToTask(l)));
+        }
+
+        function taskStatementHtml(t) {
+            if (t.custom) return t.taskHtml;
+            const m = t.theory.match(/<p><b>Задача:<\/b>[\s\S]*?<\/p>/);
+            return m ? m[0] : t.theory;
+        }
+
+        // Запуск без вывода в основную консоль (для экзамена)
+        function execCpp(code, input) {
+            let out = '';
+            try {
+                JSCPP.run(code, input || '', { stdio: { write: s => { out += s; } }, maxTimeout: 5000 });
+                return { ok: true, out: out };
+            } catch (e) {
+                return { ok: false, out: out, error: (e && e.message) || String(e) };
+            }
+        }
+        function gradeTask(t, code) {
+            const r = execCpp(code, t.input || '');
+            return r.ok && r.out.trim() === String(t.expectedOutput).trim();
+        }
+
+        // ---------------------------------------------------------------
+        // СТУДЕНТ: баннер экзамена
+        // ---------------------------------------------------------------
+        async function loadExamBanner() {
+            const box = el('examBanner');
+            if (!box || !db) return;
+            const [ex, rs] = await Promise.all([
+                db.from('exams').select('*').order('id', { ascending: false }),
+                db.from('exam_results').select('*').eq('user_id', currentUserId)
+            ]);
+            if (ex.error) { console.warn('exams:', ex.error.message); box.innerHTML = ''; return; }
+            examsOpen = ex.data || [];
+            examResults = {};
+            (rs.data || []).forEach(r => { examResults[r.exam_id] = r; });
+            renderExamBanner();
+        }
+
+        function renderExamBanner() {
+            const box = el('examBanner');
+            box.innerHTML = '';
+            examsOpen.forEach(e => {
+                const r = examResults[e.id];
+                const finished = !!(r && r.finished_at);
+                if (!e.is_open && !finished) return;
+
+                const card = document.createElement('div');
+                card.className = 'exam-card';
+                const title = document.createElement('div');
+                title.style.fontWeight = 'bold';
+                title.textContent = '📝 Экзамен: ' + e.title;
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+                card.append(title, meta);
+
+                if (finished) {
+                    meta.textContent = 'Ваш результат: ' + r.score + ' / ' + r.total + (r.late ? ' (сдано с опозданием)' : '');
+                } else {
+                    meta.textContent = r
+                        ? 'Экзамен начат — можно продолжить'
+                        : e.task_ids.length + ' задач · ' + e.duration_min + ' мин';
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-check';
+                    btn.style.width = '100%';
+                    btn.style.justifyContent = 'center';
+                    btn.textContent = r ? '▶ Продолжить экзамен' : 'Начать экзамен';
+                    btn.onclick = () => startExam(e, !!r);
+                    card.appendChild(btn);
+                }
+                box.appendChild(card);
+            });
+        }
+
+        // ---------------------------------------------------------------
+        // СТУДЕНТ: прохождение экзамена
+        // ---------------------------------------------------------------
+        function examDraftKey(examId) { return 'cpp_exam_' + examId + '_' + currentUserId; }
+        function saveExamDraft() {
+            if (!examSession) return;
+            try { localStorage.setItem(examDraftKey(examSession.exam.id), JSON.stringify(examSession.codes)); } catch (e) {}
+        }
+        function currentExamTask() { return examSession.list[examSession.idx]; }
+
+        async function startExam(e, resuming) {
+            if (examSession) return;
+            if (!resuming && !confirm(
+                'Экзамен «' + e.title + '»\nЗаданий: ' + e.task_ids.length + ', время: ' + e.duration_min + ' мин.\n\n' +
+                'Таймер запустится сразу и остановить его нельзя. ИИ-помощник и список лекций во время экзамена недоступны.\n\nНачать?')) return;
+
+            await flushSave();
+            const { data, error } = await db.rpc('start_exam', { p_exam: e.id });
+            if (error) { showToast(error.message, true); await loadExamBanner(); return; }
+            if (data.finished_at) { showToast('Вы уже сдали этот экзамен.'); await loadExamBanner(); return; }
+
+            const list = [];
+            e.task_ids.forEach(id => { const t = tasks.find(x => x.id === id); if (t) list.push(t); });
+            if (!list.length) { showToast('Нет доступных заданий. Сообщите преподавателю.', true); return; }
+
+            let draft = {};
+            try { draft = JSON.parse(localStorage.getItem(examDraftKey(e.id)) || '{}') || {}; } catch (err) {}
+
+            examSession = {
+                exam: e,
+                list: list,
+                idx: 0,
+                codes: draft,
+                ok: {},
+                offset: new Date(data.server_now).getTime() - Date.now(),
+                deadline: new Date(data.started_at).getTime() + e.duration_min * 60000,
+                finishing: false
+            };
+
+            el('exTitle').textContent = e.title;
+            document.querySelector('#studentView .sidebar').classList.add('hidden');
+            el('studentMain').classList.add('hidden');
+            el('examView').classList.remove('hidden');
+            el('ai-chat-toggle').classList.add('hidden');
+            el('ai-chat-container').style.display = 'none';
+            window.scrollTo({ top: 0 });
+
+            renderExamTabs();
+            examLoadTask();
+            examTickFn();
+            examTick = setInterval(examTickFn, 1000);
+        }
+
+        function fmtTime(ms) {
+            const s = Math.max(0, Math.floor(ms / 1000));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+            const p = n => String(n).padStart(2, '0');
+            return (h ? h + ':' : '') + p(m) + ':' + p(sec);
+        }
+
+        function examTickFn() {
+            if (!examSession) return;
+            const ms = examSession.deadline - (Date.now() + examSession.offset);
+            el('exTimer').textContent = fmtTime(ms);
+            el('exTimer').classList.toggle('danger', ms < 5 * 60000);
+            if (ms <= 0) {
+                clearInterval(examTick);
+                finishExam(true);
+            }
+        }
+
+        function renderExamTabs() {
+            const s = examSession, box = el('exTabs');
+            box.innerHTML = '';
+            s.list.forEach((t, i) => {
+                const b = document.createElement('button');
+                b.className = 'exam-tab' + (i === s.idx ? ' active' : '') + (s.ok[t.id] ? ' done' : '');
+                b.textContent = (i + 1) + (s.ok[t.id] ? ' ✓' : '');
+                b.onclick = () => examGo(i);
+                box.appendChild(b);
+            });
+        }
+
+        function examLoadTask() {
+            const s = examSession, t = currentExamTask();
+            el('exSub').textContent = 'Задание ' + (s.idx + 1) + ' из ' + s.list.length;
+            el('exTask').innerHTML = '<h3>' + escHtml(t.title) + '</h3>' + taskStatementHtml(t);
+            el('exEditor').value = (s.codes[t.id] !== undefined) ? s.codes[t.id] : t.starterCode;
+            el('exOutput').textContent = 'Нажмите «Запустить»...';
+            el('exStatus').className = 'status-message';
+        }
+
+        function examStoreCode() {
+            if (!examSession) return;
+            examSession.codes[currentExamTask().id] = el('exEditor').value;
+            saveExamDraft();
+        }
+
+        function examGo(i) {
+            if (!examSession || i === examSession.idx) return;
+            examStoreCode();
+            examSession.idx = i;
+            renderExamTabs();
+            examLoadTask();
+        }
+
+        el('exEditor').addEventListener('input', examStoreCode);
+
+        el('exRun').onclick = () => {
+            if (!examSession) return;
+            const t = currentExamTask();
+            const r = execCpp(el('exEditor').value, t.input || '');
+            el('exOutput').textContent = r.ok ? r.out : 'Ошибка компиляции:\n' + r.error;
+        };
+
+        el('exCheck').onclick = () => {
+            if (!examSession) return;
+            examStoreCode();
+            const t = currentExamTask();
+            const r = execCpp(el('exEditor').value, t.input || '');
+            el('exOutput').textContent = r.ok ? r.out : 'Ошибка компиляции:\n' + r.error;
+            const ok = r.ok && r.out.trim() === String(t.expectedOutput).trim();
+            examSession.ok[t.id] = ok;
+            const st = el('exStatus');
+            st.textContent = ok ? '✅ Вывод совпал с ожидаемым.' : '❌ Вывод не совпал. Исправьте решение и проверьте ещё раз.';
+            st.className = 'status-message ' + (ok ? 'status-success' : 'status-error');
+            renderExamTabs();
+        };
+
+        el('exFinish').onclick = () => finishExam(false);
+
+        async function finishExam(auto) {
+            const s = examSession;
+            if (!s || s.finishing) return;
+            if (!auto && !confirm('Завершить экзамен и отправить результат? Вернуться к нему будет нельзя.')) return;
+            s.finishing = true;
+            clearInterval(examTick);
+            examStoreCode();
+            el('exFinish').disabled = true;
+            el('exFinish').textContent = 'Отправка...';
+
+            // Итог считается по последнему коду каждого задания
+            let score = 0;
+            const answers = {};
+            s.list.forEach(t => {
+                const code = (s.codes[t.id] !== undefined) ? s.codes[t.id] : t.starterCode;
+                const ok = gradeTask(t, code);
+                if (ok) score++;
+                answers[t.id] = { ok: ok, code: code.slice(0, 20000) };
+            });
+
+            const { error } = await db.rpc('finish_exam', {
+                p_exam: s.exam.id, p_score: score, p_total: s.list.length, p_answers: answers
+            });
+            if (error) {
+                s.finishing = false;
+                el('exFinish').disabled = false;
+                el('exFinish').textContent = 'Отправить ещё раз';
+                el('exTimer').textContent = 'Нет связи';
+                showToast('Не удалось отправить результат: ' + error.message + '. Проверьте интернет и нажмите «Отправить ещё раз».', true);
+                return;
+            }
+            try { localStorage.removeItem(examDraftKey(s.exam.id)); } catch (e) {}
+            leaveExamView();
+            await loadExamBanner();
+            showToast('Экзамен сдан. Результат: ' + score + ' / ' + s.list.length);
+        }
+
+        function leaveExamView() {
+            clearInterval(examTick);
+            examSession = null;
+            el('exFinish').disabled = false;
+            el('exFinish').textContent = 'Завершить экзамен';
+            el('examView').classList.add('hidden');
+            el('studentMain').classList.remove('hidden');
+            const sb = document.querySelector('#studentView .sidebar');
+            if (sb) sb.classList.remove('hidden');
+            el('ai-chat-toggle').classList.remove('hidden');
+        }
+
+        function resetExamUi() {
+            leaveExamView();
+            examsOpen = [];
+            examResults = {};
+            const b = el('examBanner');
+            if (b) b.innerHTML = '';
+        }
+
+        // ---------------------------------------------------------------
+        // ПРЕПОДАВАТЕЛЬ: вкладки
+        // ---------------------------------------------------------------
+        function showTab(tab) {
+            ['groups', 'lectures', 'exams'].forEach(n => {
+                el('tv_' + n).classList.toggle('hidden', n !== tab);
+                document.querySelector('.tab-btn[data-tab="' + n + '"]').classList.toggle('active', n === tab);
+            });
+            if (tab === 'lectures') loadTeacherLectures();
+            if (tab === 'exams') loadTeacherExams();
+        }
+
+        function setMsg(id, text, isErr) {
+            const m = el(id);
+            m.textContent = text || '';
+            m.className = 'form-msg' + (text ? (isErr ? ' err' : ' ok') : '');
+        }
+
+        // ---------------------------------------------------------------
+        // ПРЕПОДАВАТЕЛЬ: лекции
+        // ---------------------------------------------------------------
+        async function loadTeacherLectures() {
+            const { data, error } = await db.from('lectures').select('*').order('id', { ascending: false });
+            if (error) { setMsg('lecMsg', 'Не удалось загрузить лекции: ' + error.message, true); return; }
+            lecturesAll = data || [];
+            renderLectureList();
+        }
+
+        function renderLectureList() {
+            const box = el('lecList');
+            box.innerHTML = '';
+            if (!lecturesAll.length) {
+                const p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'Пока нет ни одной лекции. Заполните форму выше.';
+                box.appendChild(p);
+                return;
+            }
+            lecturesAll.forEach(l => {
+                const row = document.createElement('div');
+                row.className = 'list-row';
+                const info = document.createElement('div');
+                const t = document.createElement('b');
+                t.textContent = l.title;
+                const meta = document.createElement('div');
+                meta.className = 'row-meta';
+                meta.textContent = (l.group_name ? 'Группа ' + l.group_name : 'Для всех групп') +
+                    ' · ' + new Date(l.created_at).toLocaleDateString('ru-RU') +
+                    (l.author_id === currentUserId ? '' : ' · другой преподаватель');
+                info.append(t, meta);
+                row.appendChild(info);
+
+                if (l.author_id === currentUserId) {
+                    const act = document.createElement('div');
+                    act.className = 'row-actions';
+                    const e = document.createElement('button');
+                    e.className = 'btn btn-sm btn-ghost';
+                    e.textContent = 'Изменить';
+                    e.onclick = () => editLecture(l.id);
+                    const d = document.createElement('button');
+                    d.className = 'btn btn-sm btn-danger';
+                    d.textContent = 'Удалить';
+                    d.onclick = () => deleteLecture(l.id);
+                    act.append(e, d);
+                    row.appendChild(act);
+                }
+                box.appendChild(row);
+            });
+        }
+
+        function resetLectureForm() {
+            editingLectureId = null;
+            ['lecTitle', 'lecSubtitle', 'lecGroup', 'lecTheory', 'lecTask', 'lecInput', 'lecExpected', 'lecStarter']
+                .forEach(id => { el(id).value = ''; });
+            el('lecFormTitle').textContent = 'Новая лекция';
+            el('lecSave').textContent = 'Сохранить лекцию';
+            el('lecCancel').classList.add('hidden');
+            setMsg('lecMsg', '');
+        }
+
+        function editLecture(id) {
+            const l = lecturesAll.find(x => x.id === id);
+            if (!l) return;
+            editingLectureId = id;
+            el('lecTitle').value = l.title || '';
+            el('lecSubtitle').value = l.subtitle || '';
+            el('lecGroup').value = l.group_name || '';
+            el('lecTheory').value = l.theory || '';
+            el('lecTask').value = l.task_text || '';
+            el('lecInput').value = l.input_data || '';
+            el('lecExpected').value = l.expected_output || '';
+            el('lecStarter').value = l.starter_code || '';
+            el('lecFormTitle').textContent = 'Изменение лекции';
+            el('lecSave').textContent = 'Сохранить изменения';
+            el('lecCancel').classList.remove('hidden');
+            setMsg('lecMsg', '');
+            el('lecFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function saveLecture() {
+            const rec = {
+                title: val('lecTitle'),
+                subtitle: val('lecSubtitle') || null,
+                group_name: normalizeGroup(el('lecGroup').value) || null,
+                theory: el('lecTheory').value.trim(),
+                task_text: el('lecTask').value.trim(),
+                input_data: el('lecInput').value.replace(/\r/g, ''),
+                expected_output: el('lecExpected').value.replace(/\r/g, '').trim(),
+                starter_code: el('lecStarter').value.replace(/\r/g, '')
+            };
+            if (!rec.title || !rec.theory || !rec.task_text || !rec.expected_output) {
+                return setMsg('lecMsg', 'Заполните название, текст лекции, условие задачи и ожидаемый вывод.', true);
+            }
+            const btn = el('lecSave');
+            btn.disabled = true;
+            let error;
+            if (editingLectureId) {
+                ({ error } = await db.from('lectures').update(rec).eq('id', editingLectureId));
+            } else {
+                ({ error } = await db.from('lectures').insert({ ...rec, author_id: currentUserId }));
+            }
+            btn.disabled = false;
+            if (error) return setMsg('lecMsg', 'Не удалось сохранить: ' + error.message, true);
+            const wasEdit = !!editingLectureId;
+            resetLectureForm();
+            setMsg('lecMsg', wasEdit ? 'Изменения сохранены.' : 'Лекция добавлена. Студенты увидят её в списке заданий.');
+            fillGroupList();
+            loadTeacherLectures();
+        }
+
+        async function deleteLecture(id) {
+            const l = lecturesAll.find(x => x.id === id);
+            if (!confirm('Удалить лекцию «' + (l ? l.title : '') + '»? Студенты больше не увидят её, а в экзаменах она пропадёт.')) return;
+            const { error } = await db.from('lectures').delete().eq('id', id);
+            if (error) return setMsg('lecMsg', 'Не удалось удалить: ' + error.message, true);
+            if (editingLectureId === id) resetLectureForm();
+            loadTeacherLectures();
+        }
+
+        // ---------------------------------------------------------------
+        // ПРЕПОДАВАТЕЛЬ: экзамены
+        // ---------------------------------------------------------------
+        async function loadTeacherExams() {
+            const [ex, lec] = await Promise.all([
+                db.from('exams').select('*').order('id', { ascending: false }),
+                db.from('lectures').select('*').order('id')
+            ]);
+            if (lec.data) lecturesAll = lec.data;
+            if (ex.error) { setMsg('examMsg', 'Не удалось загрузить экзамены: ' + ex.error.message, true); return; }
+            examsAll = ex.data || [];
+            renderExamTaskPicker();
+            renderExamList();
+        }
+
+        function renderExamTaskPicker() {
+            const box = el('examTaskList');
+            const checked = new Set([...box.querySelectorAll('input:checked')].map(i => +i.value));
+            box.innerHTML = '';
+            const addTitle = text => {
+                const h = document.createElement('div');
+                h.className = 'pick-title';
+                h.textContent = text;
+                box.appendChild(h);
+            };
+            const addItem = (id, text) => {
+                const lab = document.createElement('label');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = id;
+                cb.checked = checked.has(id);
+                const sp = document.createElement('span');
+                sp.textContent = text;
+                lab.append(cb, sp);
+                box.appendChild(lab);
+            };
+            addTitle('Курс (1–25)');
+            baseTasks.forEach(t => addItem(t.id, t.title));
+            if (lecturesAll.length) {
+                addTitle('Лекции преподавателей');
+                lecturesAll.forEach(l => addItem(1000 + l.id, l.title + (l.group_name ? ' [' + l.group_name + ']' : '')));
+            }
+        }
+
+        async function createExam() {
+            const title = val('examTitle');
+            const group = normalizeGroup(el('examGroup').value);
+            const minutes = parseInt(el('examMinutes').value, 10);
+            const ids = [...el('examTaskList').querySelectorAll('input:checked')].map(i => +i.value);
+
+            if (!title) return setMsg('examMsg', 'Введите название экзамена.', true);
+            if (!group) return setMsg('examMsg', 'Укажите группу.', true);
+            if (!(minutes >= 5 && minutes <= 300)) return setMsg('examMsg', 'Время — от 5 до 300 минут.', true);
+            if (!ids.length) return setMsg('examMsg', 'Отметьте хотя бы одно задание.', true);
+
+            for (const id of ids) {
+                if (id <= 1000) continue;
+                const l = lecturesAll.find(x => x.id === id - 1000);
+                if (l && l.group_name && l.group_name !== group) {
+                    return setMsg('examMsg', 'Лекция «' + l.title + '» доступна только группе ' + l.group_name + ', её нельзя дать группе ' + group + '.', true);
+                }
+            }
+
+            const btn = el('examCreate');
+            btn.disabled = true;
+            const { error } = await db.from('exams').insert({
+                author_id: currentUserId, title: title, group_name: group,
+                duration_min: minutes, task_ids: ids, is_open: false
+            });
+            btn.disabled = false;
+            if (error) return setMsg('examMsg', 'Не удалось создать экзамен: ' + error.message, true);
+
+            ['examTitle', 'examGroup'].forEach(id => { el(id).value = ''; });
+            el('examTaskList').querySelectorAll('input:checked').forEach(i => { i.checked = false; });
+            setMsg('examMsg', 'Экзамен создан. Нажмите «Открыть» в списке ниже, когда будете готовы начать.');
+            loadTeacherExams();
+        }
+
+        function renderExamList() {
+            const box = el('examList');
+            box.innerHTML = '';
+            if (!examsAll.length) {
+                const p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'Экзаменов пока нет.';
+                box.appendChild(p);
+                return;
+            }
+            examsAll.forEach(e => {
+                const row = document.createElement('div');
+                row.className = 'list-row';
+                const info = document.createElement('div');
+                const t = document.createElement('b');
+                t.textContent = e.title;
+                const chip = document.createElement('span');
+                chip.className = 'chip ' + (e.is_open ? 'chip-open' : 'chip-closed');
+                chip.textContent = e.is_open ? 'Открыт' : 'Закрыт';
+                const meta = document.createElement('div');
+                meta.className = 'row-meta';
+                meta.textContent = 'Группа ' + e.group_name + ' · ' + e.task_ids.length + ' задач · ' + e.duration_min + ' мин';
+                info.append(t, ' ', chip, meta);
+
+                const act = document.createElement('div');
+                act.className = 'row-actions';
+                const rep = document.createElement('button');
+                rep.className = 'btn btn-sm btn-ghost';
+                rep.textContent = 'Результаты';
+                rep.onclick = () => showExamReport(e.id);
+                act.appendChild(rep);
+
+                if (e.author_id === currentUserId) {
+                    const tog = document.createElement('button');
+                    tog.className = 'btn btn-sm ' + (e.is_open ? 'btn-ghost' : 'btn-check');
+                    tog.textContent = e.is_open ? 'Закрыть' : 'Открыть';
+                    tog.onclick = () => toggleExam(e.id, !e.is_open);
+                    const del = document.createElement('button');
+                    del.className = 'btn btn-sm btn-danger';
+                    del.textContent = 'Удалить';
+                    del.onclick = () => deleteExam(e.id);
+                    act.append(tog, del);
+                }
+                row.append(info, act);
+                box.appendChild(row);
+            });
+        }
+
+        async function toggleExam(id, open) {
+            const { error } = await db.from('exams').update({ is_open: open }).eq('id', id);
+            if (error) return setMsg('examMsg', 'Не удалось изменить: ' + error.message, true);
+            loadTeacherExams();
+        }
+
+        async function deleteExam(id) {
+            const e = examsAll.find(x => x.id === id);
+            if (!confirm('Удалить экзамен «' + (e ? e.title : '') + '» вместе со всеми результатами?')) return;
+            const { error } = await db.from('exams').delete().eq('id', id);
+            if (error) return setMsg('examMsg', 'Не удалось удалить: ' + error.message, true);
+            el('examReport').classList.add('hidden');
+            loadTeacherExams();
+        }
+
+        async function showExamReport(id) {
+            const e = examsAll.find(x => x.id === id);
+            const box = el('examReport');
+            box.classList.remove('hidden');
+            box.textContent = 'Загрузка...';
+            const { data, error } = await db.rpc('exam_report', { p_exam: id });
+            box.textContent = '';
+            if (error) { box.textContent = 'Не удалось загрузить результаты: ' + error.message; return; }
+
+            const h = document.createElement('h3');
+            h.style.cssText = 'color: var(--accent-purple); margin-bottom: 0.8rem;';
+            h.textContent = 'Результаты: ' + (e ? e.title + ' · группа ' + e.group_name : '');
+            box.appendChild(h);
+
+            const rows = data || [];
+            const done = rows.filter(r => r.status === 'finished');
+            const avg = done.length
+                ? Math.round(done.reduce((a, r) => a + (r.total ? r.score / r.total : 0), 0) / done.length * 100)
+                : 0;
+            const sum = document.createElement('p');
+            sum.style.cssText = 'color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;';
+            sum.textContent = 'Сдали: ' + done.length + ' из ' + rows.length + ' · средний результат: ' + avg + '%';
+            box.appendChild(sum);
+
+            if (!rows.length) {
+                const p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'В группе нет студентов.';
+                box.appendChild(p);
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'student-table';
+            const head = document.createElement('tr');
+            ['Студент', 'Статус', 'Результат', 'Начал', 'Сдал'].forEach(x => {
+                const th = document.createElement('th');
+                th.textContent = x;
+                head.appendChild(th);
+            });
+            const thead = document.createElement('thead');
+            thead.appendChild(head);
+            table.appendChild(thead);
+
+            const fmt = v => v ? new Date(v).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+            const tbody = document.createElement('tbody');
+            rows.forEach(r => {
+                const tr = document.createElement('tr');
+                const add = text => { const td = document.createElement('td'); td.textContent = text; tr.appendChild(td); return td; };
+                add(r.username).style.fontWeight = 'bold';
+                add(r.status === 'finished' ? 'Сдал' : r.status === 'in_progress' ? 'Решает' : 'Не начинал');
+                const res = add(r.status === 'finished' ? r.score + ' / ' + r.total : '—');
+                if (r.late) {
+                    const c = document.createElement('span');
+                    c.className = 'chip chip-late';
+                    c.style.marginLeft = '0.5rem';
+                    c.textContent = 'с опозданием';
+                    res.appendChild(c);
+                }
+                add(fmt(r.started_at));
+                add(fmt(r.finished_at));
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            const wrap = document.createElement('div');
+            wrap.style.overflowX = 'auto';
+            wrap.appendChild(table);
+            box.appendChild(wrap);
+
+            const reload = document.createElement('button');
+            reload.className = 'btn btn-sm btn-ghost';
+            reload.style.marginTop = '1rem';
+            reload.textContent = 'Обновить';
+            reload.onclick = () => showExamReport(id);
+            box.appendChild(reload);
         }
     </script>
 
